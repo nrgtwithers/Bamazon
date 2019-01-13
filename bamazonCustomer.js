@@ -21,13 +21,13 @@ connection.connect(function (err) {
     if (err) throw err;
     // to Show in termin if it works.
     // console.log("connected as id " + connection.threadId);
-    displayProducts();
+    startBamazon();
 });
 
 
 // Display the products in stock with table capability shown in terminal
 // Actions available for Customer to choose and item w/ ID
-function displayProducts() {
+function startBamazon() {
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
         console.log(``)
@@ -36,6 +36,7 @@ function displayProducts() {
         console.log(`------------Feel free to check out what we have to purchase.--------------`)
         console.log(``)
         console.log('__________________________________________________________________________')
+        // This is to utilize the columnify dependency and to add display products
         var columns = columnify(res, {
             columnSplitter: ' | '
         })
@@ -71,13 +72,11 @@ function displayProducts() {
                     }
                 }
             ]).then(function (answers) {
-                //test
-                // console.log(check)
                 connection.query("SELECT stock_quantity, price FROM products WHERE ?", { id: answers.id }, function (err, results) {
                     // Complete transaction if theres enough in stock
                     if (answers.qty <= results[0].stock_quantity) {
-                        // console.log(`Thank you for your purchase!`)
                         connection.query(
+                            // Updating Stock quantities in database
                             "UPDATE products SET ? WHERE ?",
                             [
                                 {
@@ -90,14 +89,19 @@ function displayProducts() {
                             function (error) {
                                 if (error) throw err;
                                 //   console.log(results)
-                                var totalPrice = results[0].stock_quantity * results[0].price
-                                console.log(`Thank you for your purchase! Your total is ${totalPrice}.`)
+                                // Variable to find the total price.
+                                var totalPrice = answers.qty * results[0].price
+                                console.log(``)
+                                console.log(`You have decided to purchase ${answers.qty} units of item number ${answers.id}`)
+                                console.log(``)
+                                console.log(`Your total is ${totalPrice}.`)
+                                // console.log(`Thank you for you purchase.`)
+                                confirmPurchase();
                             }
                         );
                     } else {
                         // If not enough let Customer know not enough product in stock.
-
-                        console.log(`Sorry, we do not have enough products in stock.`)
+                        console.log(`Sorry, at this time we do not have enough products in stock to fulfill your purchase.`)
                     }
                     connection.end();
                 })
@@ -107,3 +111,26 @@ function displayProducts() {
     });
 }
 
+
+function confirmPurchase() {
+
+    inquirer.prompt([{
+
+        type: "confirm",
+        name: "confirmation",
+        message: "Are you sure you would like to purchase this item(s)?",
+        default: true
+
+    }]).then(function(choice) {
+        // console.log(choice.confirmation)
+        if (choice.confirmation == true) {
+            console.log(``);
+            console.log(`Transaction has been completed. Thank you for your purchase!`);
+            console.log(``);
+        } else {
+            console.log(``);
+            console.log(`Aw, maybe next time.`)
+            console.log(``);
+        }
+    });
+}
