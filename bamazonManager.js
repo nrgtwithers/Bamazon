@@ -29,7 +29,7 @@ function managerPrompt() {
     inquirer.prompt([{
         type: "list",
         message: "What would you like to do?",
-        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product"],
+        choices: ["View Products for Sale", "View Low Inventory", "Add to Inventory", "Add New Product", "Exit"],
         name: "managerChoice"
     }]).then(function (action) {
         switch (action.managerChoice) {
@@ -44,9 +44,17 @@ function managerPrompt() {
                 break;
             case "Add New Product":
                 addProduct();
-                break
+                break;
+            case "Exit": 
+                exit();
+                break;
         };
     })
+}
+
+function exit(){
+    console.log(`Goodbye.`)
+    connection.end();
 }
 
 function viewStock() {
@@ -62,7 +70,7 @@ function viewStock() {
 
         console.log(``);
     })
-    connection.end();
+    // connection.end();
 }
 
 function lowStock() {
@@ -87,29 +95,34 @@ function addInventory() {
 
     inquirer.prompt([{
 
-            type: "input",
-            name: "inputId",
-            message: "Please enter the ID number of the item you would like to add inventory to.",
-        },
-        {
-            type: "input",
-            name: "inputNumber",
-            message: "How many units of this item would you like to have in the in-store stock quantity?",
+        type: "input",
+        name: "inputId",
+        message: "Please enter the ID number of the item you would like to add inventory to.",
+    },
+    {
+        type: "input",
+        name: "inputNumber",
+        message: "How many units of this item would you like to have in the in-store stock quantity?",
 
-        }
-    ]).then(function(managerAdd) {
+    }
+    ]).then(function (managerAdd) {
+        connection.query("SELECT stock_quantity FROM products WHERE ?", { id: managerAdd.id }, function (results) {
+            console.log(results)
+            connection.query("UPDATE products SET ? WHERE ?", [{
 
-              connection.query("UPDATE products SET ? WHERE ?", [{
-
-                  stock_quantity: managerAdd.inputNumber
-              }, {
-                  item_id: managerAdd.inputId
-              }], function(err, res) {
-                  console.log("Inventory Updated!")
-              });
-          managerPrompt();
-        });
-      }
+                stock_quantity: managerAdd.inputNumber + results.stock_quantity
+            }, {
+                id: managerAdd.inputId
+            }], function (err) {
+                if (err) throw err;
+                console.log("Inventory Updated!")
+                //   console.log(managerAdd.inputNumber);
+                //   console.log(managerAdd.inputId)
+                console.log('')
+            });
+        })
+    });
+}
 
 // function addInventory() {
 //     inquirer.prompt([{
@@ -157,54 +170,54 @@ function addInventory() {
 
 // This function it to ask the necessary questions to add to inventory. 
 function addProduct() {
-            inquirer.prompt([{
+    inquirer.prompt([{
 
-                type: "input",
-                name: "productName",
-                message: "Please enter the name of the new product."
-            },
-            {
-                type: "input",
-                name: "addUnits",
-                message: "How many units of this item do you have?",
-                validate: function (value) {
-                    if (isNaN(value) === false && parseInt(value) >= 1) {
-                        return true;
-                    }
-                    return false;
-                }
-            },
-            {
-                type: "input",
-                name: "departmentName",
-                message: "What department is this product in?"
-            },
-            {
-                type: "input",
-                name: "addPrice",
-                message: "What is the price of this new item",
-                validate: function (value) {
-                    if (isNaN(value) === false && parseInt(value) >= 1) {
-                        return true;
-                    }
-                    return false;
-                }
+        type: "input",
+        name: "productName",
+        message: "Please enter the name of the new product."
+    },
+    {
+        type: "input",
+        name: "addUnits",
+        message: "How many units of this item do you have?",
+        validate: function (value) {
+            if (isNaN(value) === false && parseInt(value) >= 1) {
+                return true;
             }
-            ]).then(function (action) {
-                var newProduct = {
-                    product_name: action.productName,
-                    department_name: action.departmentName,
-                    price: action.addPrice,
-                    stock_quantity: action.addUnits
-                }
-                connection.query("INSERT INTO products SET ?", newProduct, function (err) {
-                    if (err) throw err;
-                    console.log(action.productName + " has been succesfully added to your inventory! \n");
-                    //Calling on your manager's main menu
-                    managerPrompt();
-                });
-            });
-
+            return false;
         }
+    },
+    {
+        type: "input",
+        name: "departmentName",
+        message: "What department is this product in?"
+    },
+    {
+        type: "input",
+        name: "addPrice",
+        message: "What is the price of this new item",
+        validate: function (value) {
+            if (isNaN(value) === false && parseInt(value) >= 1) {
+                return true;
+            }
+            return false;
+        }
+    }
+    ]).then(function (action) {
+        var newProduct = {
+            product_name: action.productName,
+            department_name: action.departmentName,
+            price: action.addPrice,
+            stock_quantity: action.addUnits
+        }
+        connection.query("INSERT INTO products SET ?", newProduct, function (err) {
+            if (err) throw err;
+            console.log(action.productName + " has been succesfully added to your inventory! \n");
+            //Calling on your manager's main menu
+            managerPrompt();
+        });
+    });
+
+}
 
 
