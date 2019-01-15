@@ -69,8 +69,9 @@ function viewStock() {
         console.log(columns)
 
         console.log(``);
+        managerPrompt();
     })
-    // connection.end();
+    // managerPrompt();
 }
 
 function lowStock() {
@@ -98,75 +99,45 @@ function addInventory() {
         type: "input",
         name: "inputId",
         message: "Please enter the ID number of the item you would like to add inventory to.",
+        validate: function (value) {
+            if (isNaN(value) === false && parseInt(value) >= 1) {
+                return true;
+            }
+            return false;
+        }
     },
     {
         type: "input",
         name: "inputNumber",
         message: "How many units of this item would you like to have in the in-store stock quantity?",
+        validate: function (value) {
+            if (isNaN(value) === false && parseInt(value) >= 1) {
+                return true;
+            }
+            return false;
+        }
 
     }
     ]).then(function (managerAdd) {
-        connection.query("SELECT stock_quantity FROM products WHERE ?", { id: managerAdd.id }, function (results) {
-            console.log(results)
+        connection.query("SELECT stock_quantity FROM products WHERE ?", { id: managerAdd.inputId }, function (err, res) {
+            console.log(res)
+            var newTotal = parseInt(managerAdd.inputNumber + res[0].stock_quantity)
             connection.query("UPDATE products SET ? WHERE ?", [{
 
-                stock_quantity: managerAdd.inputNumber + results.stock_quantity
+                stock_quantity: newTotal
             }, {
                 id: managerAdd.inputId
             }], function (err) {
                 if (err) throw err;
+                console.log(newTotal)
                 console.log("Inventory Updated!")
-                //   console.log(managerAdd.inputNumber);
-                //   console.log(managerAdd.inputId)
                 console.log('')
+                managerPrompt();
             });
         })
     });
 }
 
-// function addInventory() {
-//     inquirer.prompt([{
-
-//         type: "input",
-//         name: "chooseID",
-//         message: "Please enter the ID number of the item you would like to add inventory to.",
-//         validate: function (value) {
-//             if (isNaN(value) === false && parseInt(value) >= 1) {
-//                 return true;
-//             }
-//             return false;
-//         }
-//     },
-//     {
-//         type: "input",
-//         name: "addUnits",
-//         message: "How many units of this item would you like to have in the in-store stock quantity?",
-//         validate: function (value) {
-//             if (isNaN(value) === false && parseInt(value) >= 1) {
-//                 return true;
-//             }
-//             return false;
-//         }
-//     }
-//     ]).then(function (update) {
-//         console.log("Updating Inventory...\n");
-//         console.log(update.addUnits)
-//         console.log(update.chooseID)
-//         // connection.query("SELECT stock_quantity FROM products WHERE ?", { id: update.chooseID }, function (err, res) {
-//             connection.query(
-//                 // Updating Stock quantities in database
-//                 "UPDATE products SET ? WHERE ?",
-//                 [{
-//                     stock_quantity: update.addUnits
-//                 }, {
-//                     item_id: update.chooseID
-//                 }], function (err){
-//                     if (err) throw err;
-//                     console.log(`Item ${update.chooseID} stock quantity has been updated by ${update.addUnits}.`)
-//                 })
-//             // });
-//     });
-// }   
 
 // This function it to ask the necessary questions to add to inventory. 
 function addProduct() {
