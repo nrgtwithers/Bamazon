@@ -16,11 +16,19 @@ Bamazon is Amazon-like storefront app. This app provides the capability for cust
 
 1. Customer will also be prompted to choose the amount of units to purchase. 
 
+1. If the app finds we do not have enough in stock it will look like this example.
+![nostock](https://github.com/nrgtwithers/Bamazon/blob/master/nostock.png?raw=true)
+
 1. If the app finds that we have enough product in stock. It will discuss your total amount you would like to purchase and the total price.
 
-1. It will then, ask for you to confirm your purchase. If yes, the transaction will be completed. If no, it will say "Aww, maybe next time."
+1. It will then, ask for you to confirm your purchase. If yes, the transaction will be completed like the example below. 
 
 ![screenshot](https://github.com/nrgtwithers/Bamazon/blob/master/bamazonCustomer.png?raw=true)
+
+1. If no, it will say "Aww, maybe next time." It will look like the example below.
+![nopurch](https://github.com/nrgtwithers/Bamazon/blob/master/noconfirmation.png?raw=true)
+
+
 
 ## How to utilize Bamazon (Manager)
 
