@@ -121,7 +121,7 @@ function addInventory() {
     ]).then(function (managerAdd) {
         connection.query("SELECT stock_quantity FROM products WHERE ?", { id: managerAdd.inputId }, function (err, res) {
             console.log(res)
-            var newTotal = parseInt(managerAdd.inputNumber + res[0].stock_quantity)
+            var newTotal = parseInt(managerAdd.inputNumber) + res[0].stock_quantity
             connection.query("UPDATE products SET ? WHERE ?", [{
 
                 stock_quantity: newTotal
